@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+curl_cffi
+playwright
+beautifulsoup4
+readability-lxml
+markdownify
