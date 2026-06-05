@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrapeMD | API for Clean Markdown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans antialiased min-h-screen flex flex-col relative">
+
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-bold text-2xl tracking-tight text-white cursor-pointer" onclick="showView('landing')">
+                <i class="fa-solid fa-code text-blue-500 mr-2"></i>Scrape<span class="text-blue-500">MD</span>
+            </div>
+            <div id="nav-logged-out" class="space-x-4">
+                <button onclick="showAuth('login')" class="text-slate-300 hover:text-white text-sm font-medium transition">Sign In</button>
+                <button onclick="showAuth('register')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2 rounded-lg transition">Sign Up</button>
+            </div>
+            <div id="nav-logged-in" class="hidden space-x-4 items-center">
+                <button onclick="showView('dashboard')" class="text-slate-300 hover:text-white text-sm font-medium transition">Dashboard</button>
+                <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm border border-blue-400 cursor-pointer">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section id="view-landing" class="flex-grow flex flex-col items-center justify-center py-20 px-6">
+        <div class="text-center max-w-3xl">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">Extract pristine Markdown from <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">any website.</span></h1>
+            <p class="text-xl text-slate-400 mb-10">The serverless API built for LLMs and AI Agents. We strip the ads, navbars, and noise. You get pure data.</p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="showAuth('register')" class="bg-blue-600 hover:bg-blue-500 text-white text-lg font-semibold px-8 py-4 rounded-xl transition flex items-center shadow-lg shadow-blue-500/20">
+                    Start Scraping Free <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-auth" class="hidden flex-grow flex items-center justify-center py-20 px-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full">
+            <h2 id="authTitle" class="text-2xl font-bold text-white mb-2">Create your Account</h2>
+            <p id="authSubtitle" class="text-slate-400 mb-6 text-sm">Register to generate your live API key.</p>
+            
+            <div id="authError" class="hidden bg-red-500/10 border border-red-500/50 text-red-400 text-sm p-3 rounded-lg mb-4"></div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
+                    <input type="email" id="authEmail" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Password</label>
+                    <input type="password" id="authPassword" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <input type="hidden" id="authMode" value="register">
+                
+                <button id="authBtn" onclick="handleAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition mt-4 flex justify-center items-center">
+                    <span>Register & Continue</span>
+                </button>
+
+                <div class="text-center mt-4 text-sm text-slate-500">
+                    <span id="authToggleText">Already have an account? <a href="#" onclick="showAuth('login')" class="text-blue-400 hover:underline">Sign In</a></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-dashboard" class="hidden flex-grow flex max-w-7xl mx-auto w-full">
+        <aside class="w-64 border-r border-slate-800 pt-8 pr-6 hidden md:block">
+            <div class="space-y-2">
+                <button id="btn-playground" onclick="switchTab('playground')" class="sidebar-btn w-full text-left px-4 py-2 rounded-lg bg-blue-600/10 text-blue-500 font-medium border border-blue-500/20 transition">
+                    <i class="fa-solid fa-flask w-6"></i> Playground
+                </button>
+                <button id="btn-keys" onclick="switchTab('keys')" class="sidebar-btn w-full text-left px-4 py-2 rounded-lg text-slate-400 border border-transparent hover:text-slate-200 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-key w-6"></i> API Keys
+                </button>
+                <button id="btn-usage" onclick="switchTab('usage')" class="sidebar-btn w-full text-left px-4 py-2 rounded-lg text-slate-400 border border-transparent hover:text-slate-200 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-6"></i> Usage & Billing
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-grow pt-8 md:pl-8 pb-12 w-full relative">
+            
+            <div id="tab-playground" class="dashboard-tab block">
+                <h2 class="text-2xl font-bold text-white mb-6">Extraction Engine</h2>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1 uppercase">Select API Key</label>
+                                <select id="activeApiKeySelector" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-blue-400 text-sm focus:outline-none font-mono">
+                                    <option value="">No keys available</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1 uppercase">Target URL</label>
+                                <div class="flex space-x-2">
+                                    <input type="url" id="targetUrl" value="https://example.com" class="flex-grow bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                                    <button onclick="runExtraction()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg font-medium transition">
+                                        Run
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="loadingState" class="hidden rounded-lg bg-blue-900/10 border border-blue-500/20 p-8 text-center">
+                            <i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-3xl mb-4"></i>
+                            <p class="text-blue-400 font-medium">Processing Request...</p>
+                        </div>
+
+                        <div>
+                            <textarea id="jsonOutput" readonly rows="12" class="w-full bg-black border border-slate-800 rounded-lg p-4 text-emerald-400 font-mono text-sm focus:outline-none resize-none">Awaiting input...</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-keys" class="dashboard-tab hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Project API Keys</h2>
+                    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition text-sm">
+                        + Generate New Key
+                    </button>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 border-b border-slate-800 text-xs uppercase text-slate-500 font-medium">
+                                <th class="px-6 py-4">Project Name</th>
+                                <th class="px-6 py-4">Key Token</th>
+                                <th class="px-6 py-4">Usage</th>
+                                <th class="px-6 py-4 text-right">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keysTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-usage" class="dashboard-tab hidden">
+                <h2 class="text-2xl font-bold text-white mb-6">Usage & Billing</h2>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:col-span-2">
+                    <h3 class="text-lg font-semibold text-white mb-4">Total API Requests</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div id="createKeyModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                <h3 class="text-lg font-bold text-white">Create New Project Key</h3>
+                <button onclick="closeModal()" class="text-slate-500 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Project Name</label>
+                    <input type="text" id="newProjectName" placeholder="e.g., Markdown Sales Agent" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Subscription Tier</label>
+                    <select id="newProjectTier" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 appearance-none cursor-pointer">
+                        <option value="free">Free Tier (100 req/mo)</option>
+                        <option value="pro" disabled>Pro Tier (Unlimited) - Requires Billing Setup</option>
+                    </select>
+                </div>
+
+                <div id="modalError" class="hidden text-red-400 text-sm"></div>
+
+                <button id="modalBtn" onclick="generateNewKey()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition mt-2">
+                    Generate API Key
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-t border-slate-800 bg-slate-950 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 py-8 flex justify-between text-slate-500 text-sm">
+            <div>&copy; 2026 ScrapeMD. Built by Songram Biswas (RUET).</div>
+            <div>Status: All Operational</div>
+        </div>
+    </footer>
+
+    <script>
+        const BACKEND_URL = "https://saas-scraper-gf9q.onrender.com";
+        let CURRENT_USER_ID = null; // Store user ID globally for session
+        let USER_KEYS = []; // Store array of keys
+
+        // View Management
+        function showView(viewId) {
+            ['landing', 'auth', 'dashboard'].forEach(id => {
+                document.getElementById(`view-${id}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function switchTab(targetTab) {
+            document.querySelectorAll('.dashboard-tab').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600/10', 'text-blue-500', 'border-blue-500/20');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            });
+            document.getElementById(`tab-${targetTab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${targetTab}`);
+            activeBtn.classList.remove('text-slate-400', 'border-transparent');
+            activeBtn.classList.add('bg-blue-600/10', 'text-blue-500', 'border-blue-500/20');
+
+            if(targetTab === 'usage') initChart();
+        }
+
+        // Modal Logic
+        function openModal() {
+            document.getElementById('newProjectName').value = '';
+            document.getElementById('modalError').classList.add('hidden');
+            document.getElementById('createKeyModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('createKeyModal').classList.add('hidden');
+        }
+
+        // Auth Toggles
+        function showAuth(mode) {
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const btn = document.getElementById('authBtn');
+            const toggle = document.getElementById('authToggleText');
+            const modeInput = document.getElementById('authMode');
+            const errorDiv = document.getElementById('authError');
+            
+            errorDiv.classList.add('hidden');
+            modeInput.value = mode;
+
+            if (mode === 'login') {
+                title.innerText = "Welcome Back";
+                subtitle.innerText = "Sign in to access your dashboard.";
+                btn.innerHTML = "<span>Sign In</span>";
+                toggle.innerHTML = 'Need an account? <a href="#" onclick="showAuth(\'register\')" class="text-blue-400 hover:underline">Sign Up</a>';
+            } else {
+                title.innerText = "Create your Account";
+                subtitle.innerText = "Register to generate your live API key.";
+                btn.innerHTML = "<span>Register & Continue</span>";
+                toggle.innerHTML = 'Already have an account? <a href="#" onclick="showAuth(\'login\')" class="text-blue-400 hover:underline">Sign In</a>';
+            }
+            showView('auth');
+        }
+
+        // Handle Login / Register Flow
+        async function handleAuth() {
+            const mode = document.getElementById('authMode').value;
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const errorDiv = document.getElementById('authError');
+            const btn = document.getElementById('authBtn');
+
+            if (!email || !password) {
+                errorDiv.innerText = "Email and Password are required.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            errorDiv.classList.add('hidden');
+
+            try {
+                if (mode === 'register') {
+                    const regResp = await fetch(`${BACKEND_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const regData = await regResp.json();
+                    if (!regResp.ok) throw new Error(regData.detail || "Registration failed.");
+                    
+                    CURRENT_USER_ID = regData.id;
+                    USER_KEYS = []; // Empty on new user
+                    refreshDashboardData();
+                    document.getElementById('nav-logged-out').classList.add('hidden');
+                    document.getElementById('nav-logged-in').classList.replace('hidden', 'flex');
+                    
+                    // Force open the modal so they create their first project immediately
+                    showView('dashboard');
+                    switchTab('keys');
+                    openModal();
+
+                } else {
+                    const loginResp = await fetch(`${BACKEND_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const loginData = await loginResp.json();
+                    if (!loginResp.ok) throw new Error(loginData.detail || "Invalid credentials.");
+
+                    CURRENT_USER_ID = loginData.user_id;
+                    USER_KEYS = loginData.api_keys || []; // Save array of keys from upgraded backend
+                    
+                    document.getElementById('nav-logged-out').classList.add('hidden');
+                    document.getElementById('nav-logged-in').classList.replace('hidden', 'flex');
+                    refreshDashboardData();
+                    showView('dashboard');
+                    switchTab('playground');
+                }
+
+            } catch (error) {
+                errorDiv.innerText = error.message;
+                errorDiv.classList.remove('hidden');
+                btn.innerHTML = mode === 'login' ? '<span>Sign In</span>' : '<span>Register & Continue</span>';
+            }
+        }
+
+        // Generate the Project Key via Modal
+        async function generateNewKey() {
+            const name = document.getElementById('newProjectName').value;
+            const errorDiv = document.getElementById('modalError');
+            const btn = document.getElementById('modalBtn');
+
+            if(!name) {
+                errorDiv.innerText = "Please provide a project name.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
+            errorDiv.classList.add('hidden');
+
+            try {
+                const keyResp = await fetch(`${BACKEND_URL}/auth/users/${CURRENT_USER_ID}/generate-key`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name }) 
+                });
+                const keyData = await keyResp.json();
+                
+                if (!keyResp.ok) throw new Error("Failed to generate Key. Try again.");
+
+                // Add new key to our local array and refresh UI
+                USER_KEYS.push({
+                    name: keyData.name || name,
+                    key: keyData.key || keyData.api_key,
+                    requests_used: 0,
+                    created_at: "Just now"
+                });
+
+                closeModal();
+                refreshDashboardData();
+
+            } catch (error) {
+                errorDiv.innerText = error.message;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = 'Generate API Key';
+            }
+        }
+
+        // Update the UI Tables and Selectors
+        function refreshDashboardData() {
+            const tableBody = document.getElementById('keysTableBody');
+            const selector = document.getElementById('activeApiKeySelector');
+            
+            tableBody.innerHTML = '';
+            selector.innerHTML = '';
+
+            if (USER_KEYS.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No project keys found. Create one above.</td></tr>`;
+                selector.innerHTML = `<option value="">No keys available</option>`;
+                return;
+            }
+
+            USER_KEYS.forEach((k) => {
+                // Populate Playground Dropdown
+                const option = document.createElement('option');
+                option.value = k.key;
+                option.text = `${k.name} (${k.key.substring(0,8)}...)`;
+                selector.appendChild(option);
+
+                // Populate Table
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-800/50 hover:bg-slate-800/30 transition";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 text-white font-medium">${k.name}</td>
+                    <td class="px-6 py-4 font-mono text-blue-400 text-sm">${k.key}</td>
+                    <td class="px-6 py-4 text-slate-400 text-sm">${k.requests_used} / 100</td>
+                    <td class="px-6 py-4 text-right text-slate-500 text-sm">${k.created_at}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Extraction Execution
+        async function runExtraction() {
+            const apiKey = document.getElementById('activeApiKeySelector').value;
+            const targetUrl = document.getElementById('targetUrl').value;
+            const outputBox = document.getElementById('jsonOutput');
+            const loader = document.getElementById('loadingState');
+
+            if(!apiKey) {
+                alert("Please generate or select a Project API Key first.");
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            outputBox.value = "";
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/extract/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                    body: JSON.stringify({ url: targetUrl })
+                });
+                const data = await response.json();
+                loader.classList.add('hidden');
+                outputBox.value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                loader.classList.add('hidden');
+                outputBox.value = `Error: \n${error.message}`;
+            }
+        }
+
+        // Dummy Chart
+        let chartInstance = null;
+        function initChart() {
+            if(chartInstance) return;
+            const ctx = document.getElementById('usageChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1st', '5th', '10th', '15th', '20th', '25th', '30th'],
+                    datasets: [{
+                        label: 'API Requests',
+                        data: [12, 19, 15, 30, 22, 45, 38],
+                        borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2, fill: true, tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: '#1e293b' } }, x: { grid: { color: '#1e293b' } } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
