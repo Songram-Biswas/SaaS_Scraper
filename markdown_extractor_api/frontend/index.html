@@ -21,8 +21,8 @@
             </div>
             <div id="nav-logged-in" class="hidden space-x-4 items-center">
                 <button onclick="showView('dashboard')" class="text-slate-300 hover:text-white text-sm font-medium transition">Dashboard</button>
-                <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm border border-blue-400 cursor-pointer">
-                    <i class="fa-solid fa-user"></i>
+                <div onclick="logout()" title="Sign Out" class="h-8 w-8 rounded-full bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 flex items-center justify-center font-bold text-sm border border-slate-700 hover:border-red-500/50 cursor-pointer transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </div>
             </div>
         </div>
@@ -32,18 +32,16 @@
         <div class="text-center max-w-3xl">
             <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">Extract pristine Markdown from <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">any website.</span></h1>
             <p class="text-xl text-slate-400 mb-10">The serverless API built for LLMs and AI Agents. We strip the ads, navbars, and noise. You get pure data.</p>
-            <div class="flex justify-center space-x-4">
-                <button onclick="showAuth('register')" class="bg-blue-600 hover:bg-blue-500 text-white text-lg font-semibold px-8 py-4 rounded-xl transition flex items-center shadow-lg shadow-blue-500/20">
-                    Start Scraping Free <i class="fa-solid fa-arrow-right ml-2"></i>
-                </button>
-            </div>
+            <button onclick="showAuth('register')" class="bg-blue-600 hover:bg-blue-500 text-white text-lg font-semibold px-8 py-4 rounded-xl transition flex items-center mx-auto shadow-lg shadow-blue-500/20">
+                Start Scraping Free <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
         </div>
     </section>
 
     <section id="view-auth" class="hidden flex-grow flex items-center justify-center py-20 px-6">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full">
-            <h2 id="authTitle" class="text-2xl font-bold text-white mb-2">Create your Account</h2>
-            <p id="authSubtitle" class="text-slate-400 mb-6 text-sm">Register to generate your live API key.</p>
+            <h2 id="authTitle" class="text-2xl font-bold text-white mb-2">Welcome</h2>
+            <p id="authSubtitle" class="text-slate-400 mb-6 text-sm">Sign in to manage your API keys.</p>
             
             <div id="authError" class="hidden bg-red-500/10 border border-red-500/50 text-red-400 text-sm p-3 rounded-lg mb-4"></div>
 
@@ -57,14 +55,14 @@
                     <input type="password" id="authPassword" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 
-                <input type="hidden" id="authMode" value="register">
+                <input type="hidden" id="authMode" value="login">
                 
                 <button id="authBtn" onclick="handleAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition mt-4 flex justify-center items-center">
-                    <span>Register & Continue</span>
+                    <span>Sign In</span>
                 </button>
 
                 <div class="text-center mt-4 text-sm text-slate-500">
-                    <span id="authToggleText">Already have an account? <a href="#" onclick="showAuth('login')" class="text-blue-400 hover:underline">Sign In</a></span>
+                    <span id="authToggleText">Need an account? <a href="#" onclick="showAuth('register')" class="text-blue-400 hover:underline">Sign Up</a></span>
                 </div>
             </div>
         </div>
@@ -80,7 +78,10 @@
                     <i class="fa-solid fa-key w-6"></i> API Keys
                 </button>
                 <button id="btn-usage" onclick="switchTab('usage')" class="sidebar-btn w-full text-left px-4 py-2 rounded-lg text-slate-400 border border-transparent hover:text-slate-200 hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-chart-line w-6"></i> Usage & Billing
+                    <i class="fa-solid fa-chart-column w-6"></i> Usage & Billing
+                </button>
+                <button id="btn-docs" onclick="switchTab('docs')" class="sidebar-btn w-full text-left px-4 py-2 rounded-lg text-slate-400 border border-transparent hover:text-slate-200 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-book w-6"></i> Documentation
                 </button>
             </div>
         </aside>
@@ -95,16 +96,13 @@
                             <div>
                                 <label class="block text-xs font-medium text-slate-500 mb-1 uppercase">Select API Key</label>
                                 <select id="activeApiKeySelector" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-blue-400 text-sm focus:outline-none font-mono">
-                                    <option value="">No keys available</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-500 mb-1 uppercase">Target URL</label>
                                 <div class="flex space-x-2">
                                     <input type="url" id="targetUrl" value="https://example.com" class="flex-grow bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-                                    <button onclick="runExtraction()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg font-medium transition">
-                                        Run
-                                    </button>
+                                    <button onclick="runExtraction()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg font-medium transition">Run</button>
                                 </div>
                             </div>
                         </div>
@@ -135,21 +133,48 @@
                                 <th class="px-6 py-4">Project Name</th>
                                 <th class="px-6 py-4">Key Token</th>
                                 <th class="px-6 py-4">Usage</th>
-                                <th class="px-6 py-4 text-right">Created</th>
+                                <th class="px-6 py-4 text-right">Delete</th>
                             </tr>
                         </thead>
                         <tbody id="keysTableBody">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
 
             <div id="tab-usage" class="dashboard-tab hidden">
-                <h2 class="text-2xl font-bold text-white mb-6">Usage & Billing</h2>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:col-span-2">
-                    <h3 class="text-lg font-semibold text-white mb-4">Total API Requests</h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Usage Analytics</h2>
+                    <button onclick="openPricing()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-4 py-2 rounded-lg font-medium transition text-sm">
+                        Upgrade Plan
+                    </button>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-white mb-4">API Requests Per Project</h3>
                     <div class="relative h-64 w-full">
                         <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-docs" class="dashboard-tab hidden">
+                <h2 class="text-2xl font-bold text-white mb-6">Integration Guide</h2>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                    <p class="text-slate-400 mb-6">Embed ScrapeMD directly into your AI Agent or Web App. Select a project key below to generate your custom integration code.</p>
+                    
+                    <label class="block text-xs font-medium text-slate-500 mb-2 uppercase">Inject Key into Code</label>
+                    <select id="docsKeySelector" onchange="updateDocsCode()" class="w-full max-w-md bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-blue-400 text-sm focus:outline-none font-mono mb-8">
+                    </select>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-white font-semibold mb-2"><i class="fa-brands fa-python text-yellow-400 mr-2"></i>Python (Single URL)</h3>
+                            <pre class="bg-black border border-slate-800 p-4 rounded-lg overflow-x-auto"><code class="text-emerald-400 font-mono text-sm" id="pythonCode"></code></pre>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-semibold mb-2"><i class="fa-brands fa-python text-yellow-400 mr-2"></i>Python (Batch Processing)</h3>
+                            <pre class="bg-black border border-slate-800 p-4 rounded-lg overflow-x-auto"><code class="text-emerald-400 font-mono text-sm" id="pythonBatchCode"></code></pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -164,25 +189,71 @@
                 <button onclick="closeModal()" class="text-slate-500 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
-            <div class="p-6 space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Project Name</label>
-                    <input type="text" id="newProjectName" placeholder="e.g., Markdown Sales Agent" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+            <div class="p-6">
+                <div id="modalFormSection" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Project Name</label>
+                        <input type="text" id="newProjectName" placeholder="e.g., Markdown Sales Agent" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div id="modalError" class="hidden text-red-400 text-sm"></div>
+
+                    <button id="modalBtn" onclick="generateNewKey()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition mt-2">
+                        Generate API Key
+                    </button>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Subscription Tier</label>
-                    <select id="newProjectTier" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 appearance-none cursor-pointer">
-                        <option value="free">Free Tier (100 req/mo)</option>
-                        <option value="pro" disabled>Pro Tier (Unlimited) - Requires Billing Setup</option>
-                    </select>
+                <div id="modalSuccessSection" class="hidden text-center">
+                    <div class="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-lg mb-2">Key Generated!</h3>
+                    <p class="text-sm text-slate-400 mb-4">Please copy this key immediately. For security reasons, you will never see it again.</p>
+                    <code id="rawKeyDisplay" class="block bg-black p-4 rounded-lg text-blue-400 select-all font-mono text-sm border border-slate-800 break-all"></code>
+                    <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-lg transition mt-6 border border-slate-700">
+                        I have copied my key
+                    </button>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div id="modalError" class="hidden text-red-400 text-sm"></div>
-
-                <button id="modalBtn" onclick="generateNewKey()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition mt-2">
-                    Generate API Key
-                </button>
+    <div id="pricingModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4 overflow-y-auto py-10">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden p-8 relative mt-auto mb-auto">
+            <button onclick="closePricing()" class="absolute top-4 right-4 text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="text-3xl font-bold text-white text-center mb-8">Select a Plan</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="border border-slate-700 bg-slate-800 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-white">Free</h3>
+                    <p class="text-3xl font-bold text-blue-400 mt-4">$0<span class="text-sm text-slate-400">/mo</span></p>
+                    <ul class="mt-6 space-y-3 text-slate-300 text-sm">
+                        <li><i class="fa-solid fa-check text-green-400 mr-2"></i>10 Extractions / mo</li>
+                        <li><i class="fa-solid fa-check text-green-400 mr-2"></i>2 API Keys max</li>
+                    </ul>
+                    <button class="w-full bg-slate-700 text-white mt-8 py-2 rounded-lg cursor-not-allowed">Current Plan</button>
+                </div>
+                
+                <div class="border border-blue-500 bg-slate-800 rounded-xl p-6 relative shadow-lg shadow-blue-500/10">
+                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl">POPULAR</div>
+                    <h3 class="text-xl font-bold text-white">Plus</h3>
+                    <p class="text-3xl font-bold text-blue-400 mt-4">$9<span class="text-sm text-slate-400">/mo</span></p>
+                    <ul class="mt-6 space-y-3 text-slate-300 text-sm">
+                        <li><i class="fa-solid fa-check text-green-400 mr-2"></i>20 Extractions / mo</li>
+                        <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Batch API Access</li>
+                    </ul>
+                    <button onclick="checkout('plus')" class="w-full bg-blue-600 hover:bg-blue-500 text-white mt-8 py-2 rounded-lg transition">Upgrade to Plus</button>
+                </div>
+                
+                <div class="border border-slate-700 bg-slate-800 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-white">Pro</h3>
+                    <p class="text-3xl font-bold text-blue-400 mt-4">$29<span class="text-sm text-slate-400">/mo</span></p>
+                    <ul class="mt-6 space-y-3 text-slate-300 text-sm">
+                        <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Unlimited Extractions</li>
+                        <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Priority Support</li>
+                    </ul>
+                    <button onclick="checkout('pro')" class="w-full bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white mt-8 py-2 rounded-lg transition">Upgrade to Pro</button>
+                </div>
             </div>
         </div>
     </div>
@@ -196,10 +267,32 @@
 
     <script>
         const BACKEND_URL = "https://saas-scraper-gf9q.onrender.com";
-        let CURRENT_USER_ID = null; // Store user ID globally for session
-        let USER_KEYS = []; // Store array of keys
+        let CURRENT_USER_ID = null; 
+        let USER_KEYS = []; 
 
-        // View Management
+        window.onload = () => {
+            const savedSession = localStorage.getItem('scrapeSession');
+            if(savedSession) {
+                const data = JSON.parse(savedSession);
+                CURRENT_USER_ID = data.id;
+                USER_KEYS = data.keys;
+                enterDashboard();
+            }
+        };
+
+        function saveSession() {
+            localStorage.setItem('scrapeSession', JSON.stringify({id: CURRENT_USER_ID, keys: USER_KEYS}));
+        }
+
+        function logout() {
+            localStorage.removeItem('scrapeSession');
+            CURRENT_USER_ID = null;
+            USER_KEYS = [];
+            document.getElementById('nav-logged-in').classList.add('hidden');
+            document.getElementById('nav-logged-out').classList.remove('hidden');
+            showView('landing');
+        }
+
         function showView(viewId) {
             ['landing', 'auth', 'dashboard'].forEach(id => {
                 document.getElementById(`view-${id}`).classList.add('hidden');
@@ -220,12 +313,14 @@
             activeBtn.classList.add('bg-blue-600/10', 'text-blue-500', 'border-blue-500/20');
 
             if(targetTab === 'usage') initChart();
+            if(targetTab === 'docs') updateDocsCode();
         }
 
-        // Modal Logic
         function openModal() {
             document.getElementById('newProjectName').value = '';
             document.getElementById('modalError').classList.add('hidden');
+            document.getElementById('modalFormSection').classList.remove('hidden');
+            document.getElementById('modalSuccessSection').classList.add('hidden');
             document.getElementById('createKeyModal').classList.remove('hidden');
         }
 
@@ -233,33 +328,40 @@
             document.getElementById('createKeyModal').classList.add('hidden');
         }
 
-        // Auth Toggles
+        function openPricing() {
+            document.getElementById('pricingModal').classList.remove('hidden');
+        }
+
+        function closePricing() {
+            document.getElementById('pricingModal').classList.add('hidden');
+        }
+
+        function checkout(plan) {
+            alert("Redirecting to Checkout gateway for the " + plan.toUpperCase() + " plan. Payment integration required.");
+        }
+
         function showAuth(mode) {
             const title = document.getElementById('authTitle');
             const subtitle = document.getElementById('authSubtitle');
             const btn = document.getElementById('authBtn');
             const toggle = document.getElementById('authToggleText');
             const modeInput = document.getElementById('authMode');
-            const errorDiv = document.getElementById('authError');
             
-            errorDiv.classList.add('hidden');
+            document.getElementById('authError').classList.add('hidden');
             modeInput.value = mode;
 
             if (mode === 'login') {
-                title.innerText = "Welcome Back";
-                subtitle.innerText = "Sign in to access your dashboard.";
+                title.innerText = "Welcome Back"; subtitle.innerText = "Sign in to manage your API keys.";
                 btn.innerHTML = "<span>Sign In</span>";
                 toggle.innerHTML = 'Need an account? <a href="#" onclick="showAuth(\'register\')" class="text-blue-400 hover:underline">Sign Up</a>';
             } else {
-                title.innerText = "Create your Account";
-                subtitle.innerText = "Register to generate your live API key.";
+                title.innerText = "Create Account"; subtitle.innerText = "Register to generate your API key.";
                 btn.innerHTML = "<span>Register & Continue</span>";
                 toggle.innerHTML = 'Already have an account? <a href="#" onclick="showAuth(\'login\')" class="text-blue-400 hover:underline">Sign In</a>';
             }
             showView('auth');
         }
 
-        // Handle Login / Register Flow
         async function handleAuth() {
             const mode = document.getElementById('authMode').value;
             const email = document.getElementById('authEmail').value;
@@ -267,11 +369,7 @@
             const errorDiv = document.getElementById('authError');
             const btn = document.getElementById('authBtn');
 
-            if (!email || !password) {
-                errorDiv.innerText = "Email and Password are required.";
-                errorDiv.classList.remove('hidden');
-                return;
-            }
+            if (!email || !password) return;
 
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
             errorDiv.classList.add('hidden');
@@ -279,142 +377,192 @@
             try {
                 if (mode === 'register') {
                     const regResp = await fetch(`${BACKEND_URL}/auth/register`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, password })
                     });
                     const regData = await regResp.json();
                     if (!regResp.ok) throw new Error(regData.detail || "Registration failed.");
                     
                     CURRENT_USER_ID = regData.id;
-                    USER_KEYS = []; // Empty on new user
-                    refreshDashboardData();
-                    document.getElementById('nav-logged-out').classList.add('hidden');
-                    document.getElementById('nav-logged-in').classList.replace('hidden', 'flex');
+                    USER_KEYS = []; 
                     
-                    // Force open the modal so they create their first project immediately
-                    showView('dashboard');
+                    enterDashboard();
                     switchTab('keys');
                     openModal();
 
                 } else {
                     const loginResp = await fetch(`${BACKEND_URL}/auth/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, password })
                     });
                     const loginData = await loginResp.json();
                     if (!loginResp.ok) throw new Error(loginData.detail || "Invalid credentials.");
 
                     CURRENT_USER_ID = loginData.user_id;
-                    USER_KEYS = loginData.api_keys || []; // Save array of keys from upgraded backend
+                    USER_KEYS = loginData.api_keys || []; 
                     
-                    document.getElementById('nav-logged-out').classList.add('hidden');
-                    document.getElementById('nav-logged-in').classList.replace('hidden', 'flex');
-                    refreshDashboardData();
-                    showView('dashboard');
-                    switchTab('playground');
+                    enterDashboard();
                 }
-
             } catch (error) {
-                errorDiv.innerText = error.message;
-                errorDiv.classList.remove('hidden');
+                errorDiv.innerText = error.message; errorDiv.classList.remove('hidden');
                 btn.innerHTML = mode === 'login' ? '<span>Sign In</span>' : '<span>Register & Continue</span>';
             }
         }
 
-        // Generate the Project Key via Modal
+        function enterDashboard() {
+            saveSession();
+            refreshDashboardData();
+            document.getElementById('nav-logged-out').classList.add('hidden');
+            document.getElementById('nav-logged-in').classList.replace('hidden', 'flex');
+            showView('dashboard');
+            switchTab('playground');
+        }
+
         async function generateNewKey() {
             const name = document.getElementById('newProjectName').value;
             const errorDiv = document.getElementById('modalError');
             const btn = document.getElementById('modalBtn');
 
-            if(!name) {
-                errorDiv.innerText = "Please provide a project name.";
-                errorDiv.classList.remove('hidden');
-                return;
-            }
+            if(!name) { errorDiv.innerText = "Project name required."; errorDiv.classList.remove('hidden'); return; }
 
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
             errorDiv.classList.add('hidden');
 
             try {
                 const keyResp = await fetch(`${BACKEND_URL}/auth/users/${CURRENT_USER_ID}/generate-key`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: name }) 
                 });
                 const keyData = await keyResp.json();
-                
-                if (!keyResp.ok) throw new Error("Failed to generate Key. Try again.");
+                if (!keyResp.ok) throw new Error(keyData.detail || "Failed to generate Key.");
 
-                // Add new key to our local array and refresh UI
+                const newKeyToken = keyData.raw_api_key; 
+                const newPrefix = keyData.prefix || newKeyToken.substring(0,8);
+
                 USER_KEYS.push({
-                    name: keyData.name || name,
-                    key: keyData.key || keyData.api_key,
+                    name: name,
+                    key: `${newPrefix}****************`, 
+                    prefix: newPrefix,
                     requests_used: 0,
-                    created_at: "Just now"
+                    limit: 10, // Defaults to 10 for standard creation
+                    raw_session_key: newKeyToken 
                 });
 
-                closeModal();
+                saveSession();
                 refreshDashboardData();
 
+                document.getElementById('modalFormSection').classList.add('hidden');
+                document.getElementById('rawKeyDisplay').innerText = newKeyToken;
+                document.getElementById('modalSuccessSection').classList.remove('hidden');
+
+                document.getElementById('activeApiKeySelector').value = newKeyToken;
+
             } catch (error) {
-                errorDiv.innerText = error.message;
-                errorDiv.classList.remove('hidden');
+                errorDiv.innerText = error.message; errorDiv.classList.remove('hidden');
             } finally {
                 btn.innerHTML = 'Generate API Key';
             }
         }
 
-        // Update the UI Tables and Selectors
+        async function deleteKey(prefix) {
+            if(!confirm("Are you sure? Any app using this key will instantly break. This cannot be undone.")) return;
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/auth/keys/${prefix}`, { method: 'DELETE' });
+                if(!response.ok) throw new Error("Server failed to delete the key.");
+                
+                USER_KEYS = USER_KEYS.filter(k => k.prefix !== prefix && k.key.substring(0,8) !== prefix);
+                
+                saveSession();
+                refreshDashboardData();
+                initChart();
+                
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
         function refreshDashboardData() {
             const tableBody = document.getElementById('keysTableBody');
             const selector = document.getElementById('activeApiKeySelector');
+            const docsSelector = document.getElementById('docsKeySelector');
             
-            tableBody.innerHTML = '';
-            selector.innerHTML = '';
+            tableBody.innerHTML = ''; selector.innerHTML = ''; docsSelector.innerHTML = '';
 
             if (USER_KEYS.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No project keys found. Create one above.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No project keys found.</td></tr>`;
                 selector.innerHTML = `<option value="">No keys available</option>`;
+                docsSelector.innerHTML = `<option value="">No keys available</option>`;
                 return;
             }
 
             USER_KEYS.forEach((k) => {
-                // Populate Playground Dropdown
-                const option = document.createElement('option');
-                option.value = k.key;
-                option.text = `${k.name} (${k.key.substring(0,8)}...)`;
-                selector.appendChild(option);
+                const workingKey = k.raw_session_key || k.key;
+                
+                const opt1 = new Option(`${k.name}`, workingKey);
+                const opt2 = new Option(`${k.name}`, workingKey);
+                selector.add(opt1); docsSelector.add(opt2);
 
-                // Populate Table
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-slate-800/50 hover:bg-slate-800/30 transition";
+                const displayLimit = k.limit ? k.limit : "10";
+                
                 tr.innerHTML = `
                     <td class="px-6 py-4 text-white font-medium">${k.name}</td>
                     <td class="px-6 py-4 font-mono text-blue-400 text-sm">${k.key}</td>
-                    <td class="px-6 py-4 text-slate-400 text-sm">${k.requests_used} / 100</td>
-                    <td class="px-6 py-4 text-right text-slate-500 text-sm">${k.created_at}</td>
+                    <td class="px-6 py-4 text-slate-400 text-sm">${k.requests_used} / ${displayLimit}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteKey('${k.prefix || k.key.substring(0,8)}')" class="text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
                 `;
                 tableBody.appendChild(tr);
             });
+            updateDocsCode();
         }
 
-        // Extraction Execution
+        function updateDocsCode() {
+            const key = document.getElementById('docsKeySelector').value || "YOUR_API_KEY_HERE";
+            
+            document.getElementById('pythonCode').innerText = `import requests
+
+API_URL = "${BACKEND_URL}/api/extract"
+HEADERS = {
+    "Content-Type": "application/json",
+    "X-API-Key": "${key}" 
+}
+PAYLOAD = { "url": "https://example.com" }
+
+response = requests.post(API_URL, json=PAYLOAD, headers=HEADERS)
+print(response.json()["markdown"])`;
+
+            document.getElementById('pythonBatchCode').innerText = `import requests
+
+API_URL = "${BACKEND_URL}/api/extract/batch"
+HEADERS = {
+    "Content-Type": "application/json",
+    "X-API-Key": "${key}" 
+}
+PAYLOAD = { 
+    "urls": [
+        "https://example.com/page1",
+        "https://example.com/page2"
+    ] 
+}
+
+response = requests.post(API_URL, json=PAYLOAD, headers=HEADERS)
+job_data = response.json()
+print(f"Batch started. Check status at /api/extract/{job_data['job_id']}/status")`;
+        }
+
         async function runExtraction() {
             const apiKey = document.getElementById('activeApiKeySelector').value;
             const targetUrl = document.getElementById('targetUrl').value;
             const outputBox = document.getElementById('jsonOutput');
             const loader = document.getElementById('loadingState');
 
-            if(!apiKey) {
-                alert("Please generate or select a Project API Key first.");
-                return;
-            }
+            if(!apiKey || apiKey.includes('***')) { alert("Please generate a NEW key. Masked keys cannot be used for extraction."); return; }
 
-            loader.classList.remove('hidden');
-            outputBox.value = "";
+            loader.classList.remove('hidden'); outputBox.value = "";
 
             try {
                 const response = await fetch(`${BACKEND_URL}/api/extract`, {
@@ -424,33 +572,52 @@
                 });
                 const data = await response.json();
                 loader.classList.add('hidden');
+                
+                if(!response.ok) {
+                    throw new Error(data.detail || "API Error");
+                }
+
                 outputBox.value = JSON.stringify(data, null, 2);
+                
+                const activeKeyIndex = USER_KEYS.findIndex(k => k.raw_session_key === apiKey);
+                if(activeKeyIndex > -1) {
+                    USER_KEYS[activeKeyIndex].requests_used += 1;
+                    saveSession();
+                    refreshDashboardData();
+                }
+
             } catch (error) {
-                loader.classList.add('hidden');
-                outputBox.value = `Error: \n${error.message}`;
+                loader.classList.add('hidden'); outputBox.value = `Error: \n${error.message}`;
             }
         }
 
-        // Dummy Chart
         let chartInstance = null;
         function initChart() {
-            if(chartInstance) return;
+            if(chartInstance) chartInstance.destroy();
+            
             const ctx = document.getElementById('usageChart').getContext('2d');
+            const labels = USER_KEYS.map(k => k.name);
+            const data = USER_KEYS.map(k => k.requests_used);
+
             chartInstance = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: ['1st', '5th', '10th', '15th', '20th', '25th', '30th'],
+                    labels: labels.length > 0 ? labels : ['No Projects'],
                     datasets: [{
-                        label: 'API Requests',
-                        data: [12, 19, 15, 30, 22, 45, 38],
-                        borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2, fill: true, tension: 0.4
+                        label: 'Successful Extractions',
+                        data: labels.length > 0 ? data : [0],
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1, borderRadius: 4
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: '#1e293b' } }, x: { grid: { color: '#1e293b' } } }
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#64748b', stepSize: 1 } }, 
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } } 
+                    }
                 }
             });
         }
