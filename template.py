@@ -25,9 +25,12 @@ list_of_files = [
     f"{project_name}/app/schemas/api_key.py",
     f"{project_name}/app/services/__init__.py",
     f"{project_name}/app/services/extractor.py",
+    f"{project_name}/frontend/index.html",
     f"{project_name}/.env",
     f"{project_name}/Dockerfile",
     f"{project_name}/.gitignore",
+    f"{project_name}/requirements.txt",
+    f"{project_name}/test_db.py",
     f"{project_name}/README.md"
 ]
 

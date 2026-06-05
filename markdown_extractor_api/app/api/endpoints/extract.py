@@ -6,7 +6,7 @@ from app.services.extractor import MarkdownExtractor
 router = APIRouter()
 
 # The Depends(validate_api_key) is the lock on the door!
-@router.post("/", response_model=ExtractionResponse)
+@router.post("/extract", response_model=ExtractionResponse)
 async def extract_markdown(
     payload: ExtractionRequest,
     api_key=Depends(validate_api_key) 
