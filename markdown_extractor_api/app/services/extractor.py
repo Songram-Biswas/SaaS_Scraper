@@ -2,12 +2,12 @@ import httpx
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
-# 1. Define the realistic browser headers
 BROWSER_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
+    # Remove 'br' (Brotli) unless you have the 'brotli' library installed
+    "Accept-Encoding": "gzip, deflate", 
     "Referer": "https://www.google.com/",
     "Connection": "keep-alive"
 }
@@ -15,14 +15,16 @@ BROWSER_HEADERS = {
 class MarkdownExtractor:
     async def extract(self, url: str) -> dict:
         try:
-            # 2. Inject the headers into the httpx client
             async with httpx.AsyncClient(headers=BROWSER_HEADERS, timeout=15.0, follow_redirects=True) as client:
                 response = await client.get(url)
                 response.raise_for_status()
-                html_content = response.text
+                
+                # FIX: Use response.content (bytes) instead of response.text
+                # BeautifulSoup will automatically detect the encoding from the bytes
+                soup = BeautifulSoup(response.content, "html.parser")
 
-            soup = BeautifulSoup(html_content, "html.parser")
-            for element in soup(["script", "style", "nav", "footer", "iframe"]):
+            # Remove noise
+            for element in soup(["script", "style", "nav", "footer", "iframe", "noscript"]):
                 element.decompose()
 
             cleaned_html = str(soup)
